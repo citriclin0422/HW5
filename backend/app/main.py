@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from .assistant import AskRequest, AskResponse, ask_assistant
 from .topics import TOPICS
 
 app = FastAPI(
@@ -61,3 +62,8 @@ def meta() -> dict:
         "difficulties": ["入門", "中階", "進階"],
         "total": len(TOPICS),
     }
+
+
+@app.post("/api/assistant/ask", response_model=AskResponse)
+def ask_ai(request: AskRequest) -> AskResponse:
+    return ask_assistant(request)

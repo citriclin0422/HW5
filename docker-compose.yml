@@ -6,6 +6,9 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/app:/app/app
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5.5}
 
   web:
     build:
@@ -20,4 +23,3 @@ services:
       - /app/.next
     depends_on:
       - api
-

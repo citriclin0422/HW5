@@ -16,3 +16,8 @@ export type Topic = {
     answer: string;
   };
 };
+
+export type AssistantMessage = {
+  role: "user" | "assistant";
+  content: string;
+};

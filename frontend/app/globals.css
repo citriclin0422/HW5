@@ -23,7 +23,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -273,6 +274,132 @@ h1 {
   line-height: 1.75;
 }
 
+.simulator {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.82fr) minmax(0, 1.4fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.parameterPanel,
+.chartPanel {
+  border: 1px solid #cdd8e8;
+  border-radius: 8px;
+  background: #f7faff;
+  padding: 18px;
+}
+
+.parameterPanel h3,
+.chartHeader h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 18px;
+}
+
+.parameterControl {
+  display: grid;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.parameterControl span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.parameterControl b {
+  color: var(--blue);
+}
+
+.parameterControl input {
+  width: 100%;
+  accent-color: var(--blue);
+}
+
+.parameterControl small,
+.chartPanel p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.chartHeader span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: white;
+  background: var(--green);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.algorithmChart {
+  width: 100%;
+  min-height: 280px;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(47, 111, 171, 0.15), transparent 26%),
+    linear-gradient(180deg, #ffffff, #f4f8fb);
+}
+
+.algorithmChart rect:first-of-type {
+  fill: rgba(255, 255, 255, 0.76);
+  stroke: #dce4ef;
+}
+
+.algorithmChart line {
+  stroke: #9fb0c1;
+  stroke-width: 2;
+}
+
+.decisionBoundary {
+  fill: none;
+  stroke: var(--green);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pointA {
+  fill: var(--blue);
+  stroke: white;
+  stroke-width: 2;
+}
+
+.pointB {
+  fill: var(--gold);
+  stroke: white;
+  stroke-width: 2;
+}
+
+.metricTrack {
+  fill: #dce4ef;
+}
+
+.metricFill {
+  fill: var(--green);
+}
+
+.algorithmChart text {
+  fill: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.algorithmChart .metricValue {
+  fill: var(--blue);
+  font-size: 13px;
+}
+
 .learningGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -349,6 +476,153 @@ h1 {
   color: var(--green);
 }
 
+.assistant {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid #cdd8e8;
+  border-radius: 8px;
+  background: #f7faff;
+}
+
+.assistantHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.assistantHeader h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+
+.assistantHeader p,
+.assistantEmpty,
+.assistantMessage p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+.assistantTopic {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: white;
+  background: var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.suggestionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.suggestionRow button {
+  border: 1px solid #cdd8e8;
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: var(--blue);
+  background: white;
+}
+
+.assistantMessages {
+  display: grid;
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 14px;
+  border: 1px solid #dce4ef;
+  border-radius: 8px;
+  background: white;
+}
+
+.assistantEmpty {
+  color: var(--muted);
+  text-align: center;
+  padding: 18px;
+}
+
+.assistantMessage {
+  max-width: 88%;
+  padding: 11px 13px;
+  border-radius: 8px;
+}
+
+.assistantMessage strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.assistantMessage.user {
+  justify-self: end;
+  background: #e9f3ff;
+}
+
+.assistantMessage.assistant {
+  justify-self: start;
+  background: #edf6f3;
+}
+
+.assistantMessage.loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.assistantError {
+  margin: 12px 0 0;
+  color: var(--red);
+  font-weight: 700;
+}
+
+.assistantForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  margin-top: 12px;
+}
+
+.assistantForm textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid #cdd8e8;
+  border-radius: 8px;
+  padding: 11px;
+}
+
+.assistantForm button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 14px;
+  color: white;
+  background: var(--blue);
+}
+
+.assistantForm button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .completionRow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -379,6 +653,7 @@ h1 {
 @media (max-width: 980px) {
   .hero,
   .workspace,
+  .simulator,
   .learningGrid {
     grid-template-columns: 1fr;
   }
@@ -404,7 +679,17 @@ h1 {
   }
 
   .filters,
-  .answerGrid {
+  .answerGrid,
+  .assistantForm {
     grid-template-columns: 1fr;
+  }
+
+  .assistantHeader {
+    display: block;
+  }
+
+  .assistantTopic {
+    display: inline-block;
+    margin-top: 10px;
   }
 }

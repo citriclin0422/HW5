@@ -16,6 +16,7 @@ venv/
 .env.*
 !.env.example
 .APIKey
+.streamlit/secrets.toml
 
 # Editors and operating systems
 .vscode/
@@ -26,3 +27,6 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Local tools and temporary files
+.tmp-*/
