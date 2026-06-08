@@ -1,0 +1,28 @@
+{
+  "name": "ml-top10-interactive",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "next": "16.2.7",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "overrides": {
+    "postcss": "8.5.15"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.10",
+    "@types/react": "18.3.16",
+    "@types/react-dom": "18.3.5",
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.2.7",
+    "typescript": "5.7.2"
+  }
+}

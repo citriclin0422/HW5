@@ -1,0 +1,410 @@
+:root {
+  --ink: #1b1f2a;
+  --muted: #667085;
+  --line: #d9e0e8;
+  --paper: #f7f8f5;
+  --panel: #ffffff;
+  --green: #167c68;
+  --blue: #2f6fab;
+  --red: #b94a48;
+  --gold: #b7791f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Arial, "Microsoft JhengHei", sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.shell {
+  min-height: 100vh;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 520px);
+  gap: 36px;
+  align-items: center;
+  min-height: 70vh;
+  padding: 40px clamp(20px, 5vw, 72px) 28px;
+  background:
+    linear-gradient(110deg, rgba(247, 248, 245, 0.96) 0%, rgba(247, 248, 245, 0.84) 55%, rgba(247, 248, 245, 0.5) 100%),
+    #edf2f0;
+  border-bottom: 1px solid var(--line);
+}
+
+.heroText {
+  max-width: 780px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+  color: var(--green);
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(42px, 7vw, 82px);
+  line-height: 1.02;
+  letter-spacing: 0;
+}
+
+.heroText > p:not(.eyebrow) {
+  max-width: 680px;
+  margin: 22px 0 0;
+  color: #384250;
+  font-size: 20px;
+  line-height: 1.7;
+}
+
+.heroStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.heroStats span {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.74);
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+.heroStats strong {
+  color: var(--blue);
+}
+
+.heroImage {
+  max-height: 62vh;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+}
+
+.heroImage img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 24px;
+  padding: 28px clamp(16px, 4vw, 48px) 48px;
+}
+
+.sidebar,
+.lesson {
+  min-width: 0;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 8px;
+}
+
+.searchBox input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.filters select {
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.topicList {
+  display: grid;
+  gap: 8px;
+}
+
+.topicButton {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 20px;
+  gap: 10px;
+  align-items: center;
+  min-height: 66px;
+  width: 100%;
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--ink);
+  text-align: left;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.topicButton.active {
+  border-color: var(--green);
+  box-shadow: inset 4px 0 0 var(--green);
+}
+
+.topicNumber {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: white;
+  background: var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.topicButton strong,
+.topicButton small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.topicButton small {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.lesson {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: clamp(18px, 3vw, 32px);
+}
+
+.lessonHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.lessonHeader h2 {
+  margin: 12px 0 4px;
+  font-size: clamp(30px, 5vw, 56px);
+  letter-spacing: 0;
+}
+
+.lessonHeader p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.tag {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: white;
+  background: var(--green);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tag.muted {
+  background: var(--gold);
+}
+
+.lessonNav {
+  display: flex;
+  gap: 8px;
+}
+
+.lessonNav button,
+.completeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.summaryBand {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 24px 0;
+  padding: 16px;
+  background: #edf6f3;
+  border: 1px solid #cfe4dc;
+  border-radius: 8px;
+}
+
+.summaryBand p {
+  margin: 0;
+  line-height: 1.75;
+}
+
+.learningGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+  min-height: 220px;
+}
+
+.panel h3,
+.quiz h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.panel p,
+.panel li,
+.quiz p {
+  line-height: 1.7;
+}
+
+.panel ul,
+.panel ol {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.example {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.quiz {
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 8px;
+  border: 1px solid #d8d0bf;
+  background: #fffaf0;
+}
+
+.answerGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.answer {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.answer.selected {
+  border-color: var(--blue);
+  background: #eef6ff;
+}
+
+.feedback {
+  margin-bottom: 0;
+  color: var(--red);
+  font-weight: 700;
+}
+
+.feedback.ok {
+  color: var(--green);
+}
+
+.completionRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.progressTrack {
+  height: 12px;
+  overflow: hidden;
+  background: #e4e8ed;
+  border-radius: 999px;
+}
+
+.progressTrack span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--blue));
+}
+
+.completeButton {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+
+@media (max-width: 980px) {
+  .hero,
+  .workspace,
+  .learningGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    min-height: auto;
+  }
+
+  .heroImage {
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 620px) {
+  .lessonHeader,
+  .completionRow {
+    display: block;
+  }
+
+  .lessonNav,
+  .completeButton {
+    margin-top: 14px;
+  }
+
+  .filters,
+  .answerGrid {
+    grid-template-columns: 1fr;
+  }
+}
