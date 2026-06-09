@@ -7,29 +7,45 @@ from urllib.request import Request, urlopen
 
 import streamlit as st
 
-
-TOPICS = [
-    ("線性迴歸", "Linear Regression", "監督式學習", "以直線描述特徵與連續目標值的關係。", "房價與銷售額預測"),
-    ("邏輯迴歸", "Logistic Regression", "監督式學習", "將線性輸出轉換為分類機率。", "垃圾郵件與風險分類"),
-    ("決策樹", "Decision Tree", "監督式學習", "使用條件判斷形成容易閱讀的樹狀規則。", "信用判斷與規則分類"),
-    ("隨機森林", "Random Forest", "集成學習", "整合多棵隨機決策樹提升穩定度。", "表格資料與特徵重要度"),
-    ("支援向量機", "Support Vector Machine", "監督式學習", "尋找類別之間間隔最大的決策邊界。", "文字與高維資料分類"),
-    ("K 最近鄰", "K-Nearest Neighbors", "監督式學習", "依據距離最近的 K 個樣本進行預測。", "相似推薦與小型分類"),
-    ("K 平均分群", "K-Means Clustering", "非監督式學習", "將資料分配到 K 個相近的群組。", "客群分析與資料探索"),
-    ("主成分分析", "Principal Component Analysis", "非監督式學習", "降低資料維度並保留主要變異。", "降維與資料視覺化"),
-    ("梯度提升", "Gradient Boosting", "集成學習", "逐步加入模型修正前一輪的錯誤。", "表格資料與風險預測"),
-    ("神經網路", "Neural Network", "深度學習", "使用多層神經元學習複雜非線性特徵。", "影像、語音與文字"),
-]
+from backend.app.topics import TOPICS
 
 
 def clamp(value: float, minimum: int, maximum: int):
     return min(maximum, max(minimum, value))
 
 
-def build_chart(title: str, complexity: int, regularization: int, training_ratio: int) -> str:
+def normalize_difficulty(value: str) -> str:
+    if "進" in value or "難" in value:
+        return "進階"
+    if "中" in value:
+        return "中等"
+    return "簡單"
+
+
+def build_metrics(complexity: int, regularization: int, training_ratio: int):
+    return [
+        ("擬合度", clamp(round(48 + complexity * 0.48 - regularization * 0.12), 25, 98)),
+        (
+            "泛化",
+            clamp(
+                round(
+                    62
+                    + training_ratio * 0.18
+                    + regularization * 0.16
+                    - abs(complexity - 58) * 0.28
+                ),
+                25,
+                98,
+            ),
+        ),
+        ("穩定度", clamp(round(38 + regularization * 0.42 + training_ratio * 0.08), 25, 98)),
+    ]
+
+
+def build_chart(topic_index: int, title: str, complexity: int, regularization: int, training_ratio: int) -> str:
     points = []
     for index in range(24):
-        angle = index * 0.72 + len(title) * 0.15
+        angle = index * 0.72 + topic_index * 0.41
         spread = 42 + complexity * 0.65 - regularization * 0.18
         center_x = 132 if index % 2 == 0 else 258
         center_y = 106 if index % 2 == 0 else 178
@@ -37,7 +53,11 @@ def build_chart(title: str, complexity: int, regularization: int, training_ratio
         x = clamp(center_x + math.cos(angle) * spread + shift, 70, 340)
         y = clamp(center_y + math.sin(angle * 1.15) * spread * 0.68, 58, 232)
         color = "#2f6fab" if index % 2 == 0 else "#b7791f"
-        points.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="6" fill="{color}" stroke="white" stroke-width="2"/>')
+        radius = 6 if index % 2 == 0 else 5
+        points.append(
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{radius}" fill="{color}" '
+            'stroke="white" stroke-width="2"/>'
+        )
 
     wiggle = max(4, complexity * 0.32 - regularization * 0.16)
     midpoint = 148 + (regularization - 40) * 0.25
@@ -46,25 +66,27 @@ def build_chart(title: str, complexity: int, regularization: int, training_ratio
         f"{clamp(midpoint + math.sin(index * 1.18) * wiggle + (index - 4) * 7, 62, 230):.1f}"
         for index in range(9)
     )
-    metrics = [
-        ("擬合度", clamp(round(48 + complexity * 0.48 - regularization * 0.12), 25, 98)),
-        (
-            "泛化",
-            clamp(round(62 + training_ratio * 0.18 + regularization * 0.16 - abs(complexity - 58) * 0.28), 25, 98),
-        ),
-        ("穩定度", clamp(round(38 + regularization * 0.42 + training_ratio * 0.08), 25, 98)),
-    ]
     bars = "".join(
-        f'<text x="390" y="{62 + index * 64}">{label}</text>'
+        f'<text x="390" y="{62 + index * 64}" font-size="14">{label}</text>'
         f'<rect x="390" y="{72 + index * 64}" width="100" height="14" rx="7" fill="#dce4ef"/>'
         f'<rect x="390" y="{72 + index * 64}" width="{value}" height="14" rx="7" fill="#167c68"/>'
         f'<text x="494" y="{84 + index * 64}" font-size="12">{value}%</text>'
-        for index, (label, value) in enumerate(metrics)
+        for index, (label, value) in enumerate(build_metrics(complexity, regularization, training_ratio))
     )
     return f"""
-    <div style="font-family:Arial,sans-serif;color:#1b1f2a">
-      <div style="font-weight:700;margin-bottom:8px">{html.escape(title)}</div>
-      <svg viewBox="0 0 530 285" style="width:100%;background:#f7faff;border:1px solid #d9e0e8;border-radius:10px">
+    <!doctype html>
+    <html lang="zh-Hant">
+    <head>
+      <style>
+        body {{ margin: 0; font-family: Arial, sans-serif; color: #1b1f2a; }}
+        .title {{ font-weight: 700; margin-bottom: 8px; }}
+        svg {{ width: 100%; min-height: 315px; background: #f7faff; border: 1px solid #d9e0e8;
+               border-radius: 12px; box-sizing: border-box; }}
+      </style>
+    </head>
+    <body>
+      <div class="title">{html.escape(title)}</div>
+      <svg viewBox="0 0 530 285" role="img" aria-label="{html.escape(title)} 參數互動圖表">
         <rect x="38" y="22" width="330" height="238" rx="10" fill="white" stroke="#dce4ef"/>
         <line x1="58" y1="240" x2="348" y2="240" stroke="#9fb0c1" stroke-width="2"/>
         <line x1="58" y1="48" x2="58" y2="240" stroke="#9fb0c1" stroke-width="2"/>
@@ -72,7 +94,8 @@ def build_chart(title: str, complexity: int, regularization: int, training_ratio
         {''.join(points)}
         {bars}
       </svg>
-    </div>
+    </body>
+    </html>
     """
 
 
@@ -91,7 +114,7 @@ def ask_ai(topic: dict, question: str) -> str:
     payload = {
         "model": get_secret("OPENAI_MODEL") or "gpt-5.5",
         "instructions": "你是友善的機器學習助教，請使用繁體中文清楚、精簡地回答。",
-        "input": f"課程：{topic['name']} ({topic['english']})\n摘要：{topic['summary']}\n問題：{question}",
+        "input": f"課程：{topic['title']} ({topic['english']})\n摘要：{topic['summary']}\n問題：{question}",
     }
     request = Request(
         "https://api.openai.com/v1/responses",
@@ -116,61 +139,163 @@ def ask_ai(topic: dict, question: str) -> str:
     return "\n".join(texts).strip() or "AI 服務沒有回傳內容。"
 
 
-def topic_record(item: tuple[str, str, str, str, str]) -> dict:
-    name, english, family, summary, use = item
-    return {"name": name, "english": english, "family": family, "summary": summary, "use": use}
+def choose_topic(slug: str):
+    st.session_state.active_slug = slug
 
 
 st.set_page_config(page_title="十大機器學習演算法互動平台", page_icon="📊", layout="wide")
-st.title("十大機器學習演算法互動平台")
-st.caption("互動調參、視覺化與 AI 問答整合版")
 
-topics = [topic_record(item) for item in TOPICS]
+if "active_slug" not in st.session_state:
+    st.session_state.active_slug = TOPICS[0]["slug"]
+if "completed" not in st.session_state:
+    st.session_state.completed = set()
+if "answers" not in st.session_state:
+    st.session_state.answers = {}
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+st.title("十大機器學習演算法互動平台")
+st.caption("用互動課程、參數視覺化、AI 問答與小測驗，理解經典機器學習演算法。")
+
+completed_count = len(st.session_state.completed)
+stat1, stat2, stat3 = st.columns(3)
+stat1.metric("課程總數", len(TOPICS))
+stat2.metric("已完成", completed_count)
+stat3.metric("學習進度", f"{round(completed_count / len(TOPICS) * 100)}%")
+st.progress(completed_count / len(TOPICS))
+
 with st.sidebar:
     st.header("選擇課程")
-    family = st.selectbox("演算法類型", ["全部"] + sorted({item["family"] for item in topics}))
     query = st.text_input("搜尋", placeholder="輸入名稱或關鍵字")
+    family = st.selectbox("演算法類型", ["全部"] + sorted({topic["family"] for topic in TOPICS}))
+    difficulty = st.selectbox("難度", ["全部", "簡單", "中等", "進階"])
 
-filtered = [
-    item
-    for item in topics
-    if (family == "全部" or item["family"] == family)
-    and (
-        not query
-        or query.casefold() in item["name"].casefold()
-        or query.casefold() in item["english"].casefold()
-        or query.casefold() in item["summary"].casefold()
+    filtered = [
+        topic
+        for topic in TOPICS
+        if (family == "全部" or topic["family"] == family)
+        and (difficulty == "全部" or normalize_difficulty(topic["difficulty"]) == difficulty)
+        and (
+            not query
+            or query.casefold() in topic["title"].casefold()
+            or query.casefold() in topic["english"].casefold()
+            or query.casefold() in topic["summary"].casefold()
+        )
+    ]
+    if not filtered:
+        st.warning("找不到符合條件的演算法。")
+    for topic_item in filtered:
+        marker = "✓ " if topic_item["slug"] in st.session_state.completed else ""
+        st.button(
+            f"{marker}{topic_item['title']} · {topic_item['english']}",
+            key=f"topic_{topic_item['slug']}",
+            use_container_width=True,
+            type="primary" if topic_item["slug"] == st.session_state.active_slug else "secondary",
+            on_click=choose_topic,
+            args=(topic_item["slug"],),
+        )
+
+topic = next((item for item in TOPICS if item["slug"] == st.session_state.active_slug), TOPICS[0])
+topic_index = TOPICS.index(topic)
+
+header, navigation = st.columns([0.8, 0.2])
+with header:
+    st.caption(f"{topic['family']} · {normalize_difficulty(topic['difficulty'])}")
+    st.subheader(f"{topic['title']} · {topic['english']}")
+with navigation:
+    previous, following = st.columns(2)
+    previous.button(
+        "← 上一課",
+        use_container_width=True,
+        on_click=choose_topic,
+        args=(TOPICS[(topic_index - 1) % len(TOPICS)]["slug"],),
     )
-]
-if not filtered:
-    st.warning("找不到符合條件的演算法。")
-    st.stop()
+    following.button(
+        "下一課 →",
+        use_container_width=True,
+        on_click=choose_topic,
+        args=(TOPICS[(topic_index + 1) % len(TOPICS)]["slug"],),
+    )
 
-selected = st.selectbox(
-    "目前課程",
-    [item["english"] for item in filtered],
-    format_func=lambda value: next(f"{item['name']} · {item['english']}" for item in filtered if item["english"] == value),
-)
-topic = next(item for item in filtered if item["english"] == selected)
-st.subheader(f"{topic['name']} · {topic['english']}")
 st.info(topic["summary"])
 
-controls, chart = st.columns([0.38, 0.62], gap="large")
+controls, chart = st.columns([0.36, 0.64], gap="large")
 with controls:
     st.markdown("### 參數調整")
-    complexity = st.slider("模型複雜度", 10, 100, 55)
-    regularization = st.slider("正則化強度", 0, 100, 35)
-    training_ratio = st.slider("訓練資料比例", 40, 90, 70)
-    st.metric("建議使用情境", topic["use"])
+    complexity = st.slider(
+        "模型複雜度",
+        10,
+        100,
+        55,
+        help="越高越容易貼近訓練資料，也越可能過度擬合。",
+    )
+    regularization = st.slider(
+        "正則化強度",
+        0,
+        100,
+        35,
+        help="越高限制越強，模型較平滑但可能欠擬合。",
+    )
+    training_ratio = st.slider(
+        "訓練資料比例",
+        40,
+        90,
+        70,
+        help="調整訓練資料量，觀察泛化分數與資料分布。",
+    )
+    for label, value in build_metrics(complexity, regularization, training_ratio):
+        st.write(f"**{label}：{value}%**")
+        st.progress(value / 100)
 with chart:
     st.markdown("### 演算法圖表")
-    st.html(build_chart(topic["english"], complexity, regularization, training_ratio))
+    st.iframe(
+        build_chart(topic_index, topic["english"], complexity, regularization, training_ratio),
+        height=350,
+    )
+    st.caption("圖表使用合成資料模擬模型邊界，拖動參數即可觀察過度擬合、欠擬合與泛化效果。")
+
+st.markdown("### 互動教學")
+why_tab, steps_tab, strengths_tab, limits_tab = st.tabs(["為什麼重要", "學習步驟", "優點", "限制"])
+with why_tab:
+    st.write(topic["why"])
+    st.success(f"實際例子：{topic['example']}")
+with steps_tab:
+    for index, step in enumerate(topic["steps"], start=1):
+        st.write(f"**{index}.** {step}")
+with strengths_tab:
+    for item in topic["strengths"]:
+        st.write(f"✓ {item}")
+with limits_tab:
+    for item in topic["limits"]:
+        st.write(f"• {item}")
+
+st.markdown("### 課後小測驗")
+st.write(topic["quiz"]["question"])
+selected_answer = st.radio(
+    "選擇答案",
+    topic["quiz"]["options"],
+    index=None,
+    key=f"quiz_{topic['slug']}",
+    label_visibility="collapsed",
+)
+if selected_answer:
+    st.session_state.answers[topic["slug"]] = selected_answer
+    if selected_answer == topic["quiz"]["answer"]:
+        st.success("答對了，觀念很穩。")
+    else:
+        st.error(f"再想想看，正確答案是：{topic['quiz']['answer']}")
+
+is_completed = topic["slug"] in st.session_state.completed
+if st.button("取消完成" if is_completed else "標記完成", type="primary", use_container_width=True):
+    if is_completed:
+        st.session_state.completed.remove(topic["slug"])
+    else:
+        st.session_state.completed.add(topic["slug"])
+    st.rerun()
 
 st.divider()
 st.markdown("### AI 學習助理")
 st.caption("在 Streamlit Community Cloud 的 App settings → Secrets 設定 OPENAI_API_KEY 後即可使用。")
-if "messages" not in st.session_state:
-    st.session_state.messages = []
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
