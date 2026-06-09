@@ -1,6 +1,4 @@
-import html
 import json
-import math
 import os
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -8,10 +6,7 @@ from urllib.request import Request, urlopen
 import streamlit as st
 
 from backend.app.topics import TOPICS
-
-
-def clamp(value: float, minimum: int, maximum: int):
-    return min(maximum, max(minimum, value))
+from model_visualizations import render_model_visualization
 
 
 def normalize_difficulty(value: str) -> str:
@@ -20,83 +15,6 @@ def normalize_difficulty(value: str) -> str:
     if "中" in value:
         return "中等"
     return "簡單"
-
-
-def build_metrics(complexity: int, regularization: int, training_ratio: int):
-    return [
-        ("擬合度", clamp(round(48 + complexity * 0.48 - regularization * 0.12), 25, 98)),
-        (
-            "泛化",
-            clamp(
-                round(
-                    62
-                    + training_ratio * 0.18
-                    + regularization * 0.16
-                    - abs(complexity - 58) * 0.28
-                ),
-                25,
-                98,
-            ),
-        ),
-        ("穩定度", clamp(round(38 + regularization * 0.42 + training_ratio * 0.08), 25, 98)),
-    ]
-
-
-def build_chart(topic_index: int, title: str, complexity: int, regularization: int, training_ratio: int) -> str:
-    points = []
-    for index in range(24):
-        angle = index * 0.72 + topic_index * 0.41
-        spread = 42 + complexity * 0.65 - regularization * 0.18
-        center_x = 132 if index % 2 == 0 else 258
-        center_y = 106 if index % 2 == 0 else 178
-        shift = (training_ratio - 65) * (0.9 if index % 3 == 0 else -0.35)
-        x = clamp(center_x + math.cos(angle) * spread + shift, 70, 340)
-        y = clamp(center_y + math.sin(angle * 1.15) * spread * 0.68, 58, 232)
-        color = "#2f6fab" if index % 2 == 0 else "#b7791f"
-        radius = 6 if index % 2 == 0 else 5
-        points.append(
-            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{radius}" fill="{color}" '
-            'stroke="white" stroke-width="2"/>'
-        )
-
-    wiggle = max(4, complexity * 0.32 - regularization * 0.16)
-    midpoint = 148 + (regularization - 40) * 0.25
-    path = " ".join(
-        f"{'M' if index == 0 else 'L'} {72 + index * 33} "
-        f"{clamp(midpoint + math.sin(index * 1.18) * wiggle + (index - 4) * 7, 62, 230):.1f}"
-        for index in range(9)
-    )
-    bars = "".join(
-        f'<text x="390" y="{62 + index * 64}" font-size="14">{label}</text>'
-        f'<rect x="390" y="{72 + index * 64}" width="100" height="14" rx="7" fill="#dce4ef"/>'
-        f'<rect x="390" y="{72 + index * 64}" width="{value}" height="14" rx="7" fill="#167c68"/>'
-        f'<text x="494" y="{84 + index * 64}" font-size="12">{value}%</text>'
-        for index, (label, value) in enumerate(build_metrics(complexity, regularization, training_ratio))
-    )
-    return f"""
-    <!doctype html>
-    <html lang="zh-Hant">
-    <head>
-      <style>
-        body {{ margin: 0; font-family: Arial, sans-serif; color: #1b1f2a; }}
-        .title {{ font-weight: 700; margin-bottom: 8px; }}
-        svg {{ width: 100%; min-height: 315px; background: #f7faff; border: 1px solid #d9e0e8;
-               border-radius: 12px; box-sizing: border-box; }}
-      </style>
-    </head>
-    <body>
-      <div class="title">{html.escape(title)}</div>
-      <svg viewBox="0 0 530 285" role="img" aria-label="{html.escape(title)} 參數互動圖表">
-        <rect x="38" y="22" width="330" height="238" rx="10" fill="white" stroke="#dce4ef"/>
-        <line x1="58" y1="240" x2="348" y2="240" stroke="#9fb0c1" stroke-width="2"/>
-        <line x1="58" y1="48" x2="58" y2="240" stroke="#9fb0c1" stroke-width="2"/>
-        <path d="{path}" fill="none" stroke="#167c68" stroke-width="4" stroke-linecap="round"/>
-        {''.join(points)}
-        {bars}
-      </svg>
-    </body>
-    </html>
-    """
 
 
 def get_secret(name: str) -> str:
@@ -218,41 +136,7 @@ with navigation:
     )
 
 st.info(topic["summary"])
-
-controls, chart = st.columns([0.36, 0.64], gap="large")
-with controls:
-    st.markdown("### 參數調整")
-    complexity = st.slider(
-        "模型複雜度",
-        10,
-        100,
-        55,
-        help="越高越容易貼近訓練資料，也越可能過度擬合。",
-    )
-    regularization = st.slider(
-        "正則化強度",
-        0,
-        100,
-        35,
-        help="越高限制越強，模型較平滑但可能欠擬合。",
-    )
-    training_ratio = st.slider(
-        "訓練資料比例",
-        40,
-        90,
-        70,
-        help="調整訓練資料量，觀察泛化分數與資料分布。",
-    )
-    for label, value in build_metrics(complexity, regularization, training_ratio):
-        st.write(f"**{label}：{value}%**")
-        st.progress(value / 100)
-with chart:
-    st.markdown("### 演算法圖表")
-    st.iframe(
-        build_chart(topic_index, topic["english"], complexity, regularization, training_ratio),
-        height=350,
-    )
-    st.caption("圖表使用合成資料模擬模型邊界，拖動參數即可觀察過度擬合、欠擬合與泛化效果。")
+render_model_visualization(topic)
 
 st.markdown("### 互動教學")
 why_tab, steps_tab, strengths_tab, limits_tab = st.tabs(["為什麼重要", "學習步驟", "優點", "限制"])
